@@ -1,0 +1,30 @@
+services:
+  witmo:
+    container_name: witmo_dev
+    init: true
+    restart: unless-stopped
+    build:
+      context: .
+    environment:
+      - PORT=4000
+      - OMDB_API_KEY=API_KEY
+#      - TMDB_API_KEY=API_KEY
+      - TMDB_READ_ACCESS_TOKEN=API_KEY
+      - WATCH_REGION=PL
+    ports:
+      - "127.0.0.1:8015:4000"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 512m
+    cpus: 1.0
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
