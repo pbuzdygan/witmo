@@ -34,7 +34,7 @@
     "@nestjs/throttler": "^6.5.0",
     "axios": "^1.20.0",
     "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.4",
+    "class-validator": "^0.15.1",
     "helmet": "^8.3.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
@@ -62,7 +62,7 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.68.0"
+    "typescript-eslint": "^8.69.0"
   },
   "jest": {
     "moduleFileExtensions": [
