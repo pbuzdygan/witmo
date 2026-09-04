@@ -1,4 +1,4 @@
-FROM node:24.20.0-alpine3.24@sha256:4caaaf42195bcd6f6f3559a413b20cb8f8ad089e231ee874cf7701643966689f AS frontend-deps
+FROM node:26.8.1-alpine3.24@sha256:2d984a15c9b54fd0aeb608b8e0d0d83529eb34d2966db27a1fb4f1edc3d298a3 AS frontend-deps
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm ci --ignore-scripts --no-audit --no-fund
@@ -6,14 +6,14 @@ COPY frontend ./
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM node:24.20.0-alpine3.24@sha256:4caaaf42195bcd6f6f3559a413b20cb8f8ad089e231ee874cf7701643966689f AS backend-deps
+FROM node:26.8.1-alpine3.24@sha256:2d984a15c9b54fd0aeb608b8e0d0d83529eb34d2966db27a1fb4f1edc3d298a3 AS backend-deps
 WORKDIR /app/backend
 COPY backend/package*.json ./
 RUN npm ci --ignore-scripts --no-audit --no-fund
 COPY backend ./
 RUN npm run bundle
 
-FROM node:24.20.0-alpine3.24@sha256:4caaaf42195bcd6f6f3559a413b20cb8f8ad089e231ee874cf7701643966689f AS runner
+FROM node:26.8.1-alpine3.24@sha256:2d984a15c9b54fd0aeb608b8e0d0d83529eb34d2966db27a1fb4f1edc3d298a3 AS runner
 WORKDIR /app/backend
 ENV NODE_ENV=production
 ENV PORT=4000
