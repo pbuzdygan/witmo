@@ -5,45 +5,26 @@ updates:
     schedule:
       interval: weekly
       day: monday
-    groups:
-      npm-backend:
-        patterns:
-          - '*'
-    # Major upgrades (for example NestJS) can require coordinated code changes.
-    ignore:
-      - dependency-name: '*'
-        update-types:
-          - version-update:semver-major
+    # Disable routine version bumps; Dependabot security updates still work.
+    open-pull-requests-limit: 0
   - package-ecosystem: npm
     directory: /frontend
     schedule:
       interval: weekly
       day: monday
-    groups:
-      npm-frontend:
-        patterns:
-          - '*'
-    # Keep TypeScript, Next.js and ESLint major upgrades as intentional PRs.
-    ignore:
-      - dependency-name: '*'
-        update-types:
-          - version-update:semver-major
+    # Disable routine version bumps; Dependabot security updates still work.
+    open-pull-requests-limit: 0
   - package-ecosystem: docker
     directory: /
     schedule:
       interval: weekly
       day: monday
-    # The application currently supports Node.js 24 only (>=24 <25).
-    ignore:
-      - dependency-name: node
-        update-types:
-          - version-update:semver-major
+    # Disable routine version bumps; Dependabot security updates still work.
+    open-pull-requests-limit: 0
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
       day: monday
-    groups:
-      github-actions:
-        patterns:
-          - '*'
+    # Disable routine version bumps; Dependabot security updates still work.
+    open-pull-requests-limit: 0
