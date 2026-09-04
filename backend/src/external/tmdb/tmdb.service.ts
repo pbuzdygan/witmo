@@ -559,8 +559,9 @@ export class TmdbService {
       page: '1',
     };
     if (year) {
-      params[type === 'movie' ? 'primary_release_year' : 'first_air_date_year'] =
-        year;
+      params[
+        type === 'movie' ? 'primary_release_year' : 'first_air_date_year'
+      ] = year;
     }
     const config = this.buildRequestConfig(params);
     const data = await this.request<TmdbSearchResponse>(endpoint, config);

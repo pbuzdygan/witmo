@@ -96,7 +96,16 @@ npm run lint
 npm run build
 ```
 
-GitHub Actions runs these checks together with dependency auditing, CodeQL analysis, secret scanning, a production image build, and an image-size budget. Dependabot checks npm dependencies, the base image, and GitHub Actions weekly.
+GitHub Actions runs dependency auditing, linting, tests, application builds, CodeQL analysis, and secret scanning. It does not build a container image on commits or pull requests. Dependabot checks npm dependencies, the base image, and GitHub Actions weekly.
+
+## Container releases
+
+Container images are published to GitHub Container Registry only after a GitHub Release is published. The release must target exactly `main` or `dev`; releases targeting another branch are ignored.
+
+- A `main` release with tag `v1.2.3` publishes `ghcr.io/pbuzdygan/witmo:v1.2.3` and `ghcr.io/pbuzdygan/witmo:latest`.
+- A `dev` release with tag `v1.2.3` publishes `ghcr.io/pbuzdygan/witmo:dev_v1.2.3` and `ghcr.io/pbuzdygan/witmo:dev_latest`.
+
+This keeps both channels independent even if their releases use the same version tag.
 
 ## OMDb and TMDb integration
 

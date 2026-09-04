@@ -155,7 +155,11 @@ export class OmdbService {
     }
 
     if (title.trim()) {
-      const tmdbMatches = await this.tmdbService.searchByTitle(title, type, year);
+      const tmdbMatches = await this.tmdbService.searchByTitle(
+        title,
+        type,
+        year,
+      );
       tmdbMatches.forEach((match, index) => {
         tmdbPriority.set(match.imdbId, index);
         if (seenIds.has(match.imdbId)) {
