@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 import { ConcurrencyLimiter } from '../../common/concurrency-limiter';
 import { MovieSearchResult } from '../../movies/dto/movie.dtos';
+import { SearchMediaType } from '../../movies/dto/search-movies-query.dto';
 import { TmdbService } from '../tmdb/tmdb.service';
 
 interface OmdbSearchResponse {
@@ -87,6 +88,7 @@ export class OmdbService {
   async searchMovies(
     title: string,
     year?: string,
+    type?: SearchMediaType,
   ): Promise<MovieSearchResult[]> {
     const params: Record<string, string> = {
       apikey: this.apiKey,
@@ -95,8 +97,12 @@ export class OmdbService {
     if (year) {
       params.y = year;
     }
+    if (type) {
+      params.type = type;
+    }
 
     const seenIds = new Set<string>();
+    const tmdbPriority = new Map<string, number>();
     const aggregated: MovieSearchResult[] = [];
 
     const MAX_PAGES = 5;
@@ -116,7 +122,7 @@ export class OmdbService {
 
       data.Search?.forEach((item) => {
         if (
-          !this.isSupportedType(item.Type) ||
+          !this.isSupportedType(item.Type, type) ||
           !/^tt\d{7,10}$/.test(item.imdbID)
         ) {
           return;
@@ -143,14 +149,15 @@ export class OmdbService {
       currentPage += 1;
     }
 
-    const exactMatch = await this.fetchByTitle(title, year);
+    const exactMatch = await this.fetchByTitle(title, year, type);
     if (exactMatch && !seenIds.has(exactMatch.imdbId)) {
       aggregated.push(exactMatch);
     }
 
     if (title.trim()) {
-      const tmdbMatches = await this.tmdbService.searchByTitle(title);
-      tmdbMatches.forEach((match) => {
+      const tmdbMatches = await this.tmdbService.searchByTitle(title, type, year);
+      tmdbMatches.forEach((match, index) => {
+        tmdbPriority.set(match.imdbId, index);
         if (seenIds.has(match.imdbId)) {
           return;
         }
@@ -159,9 +166,16 @@ export class OmdbService {
       });
     }
 
-    return aggregated.sort(
-      (a, b) => this.extractYear(b.year) - this.extractYear(a.year),
-    );
+    return aggregated
+      .filter((item) => !year || item.year?.startsWith(year))
+      .sort((a, b) => {
+        const priorityA = tmdbPriority.get(a.imdbId) ?? Number.MAX_SAFE_INTEGER;
+        const priorityB = tmdbPriority.get(b.imdbId) ?? Number.MAX_SAFE_INTEGER;
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB;
+        }
+        return this.extractYear(b.year) - this.extractYear(a.year);
+      });
   }
 
   async getMovieByImdbId(imdbId: string): Promise<NormalizedOmdbMovie> {
@@ -209,6 +223,7 @@ export class OmdbService {
   private async fetchByTitle(
     title: string,
     year?: string,
+    type?: SearchMediaType,
   ): Promise<MovieSearchResult | null> {
     if (!title.trim()) {
       return null;
@@ -221,6 +236,9 @@ export class OmdbService {
     if (year) {
       params.y = year;
     }
+    if (type) {
+      params.type = type;
+    }
 
     const data = await this.request<OmdbMovieResponse>(params);
 
@@ -228,7 +246,7 @@ export class OmdbService {
       return null;
     }
 
-    if (!this.isSupportedType(data.Type)) {
+    if (!this.isSupportedType(data.Type, type)) {
       return null;
     }
 
@@ -248,11 +266,17 @@ export class OmdbService {
     return match ? parseInt(match[0], 10) : 0;
   }
 
-  private isSupportedType(type?: string): boolean {
+  private isSupportedType(
+    type?: string,
+    requestedType?: SearchMediaType,
+  ): boolean {
     if (!type) {
       return false;
     }
     const normalized = type.toLowerCase();
+    if (requestedType) {
+      return normalized === requestedType;
+    }
     return (
       normalized === 'movie' ||
       normalized === 'series' ||

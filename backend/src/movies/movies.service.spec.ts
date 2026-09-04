@@ -54,6 +54,26 @@ describe('MoviesService', () => {
     expect(omdb.searchMovies).toHaveBeenCalledTimes(1);
   });
 
+  it('forwards the selected media type to the provider and keeps it in the cache key', async () => {
+    const { service, omdb } = createService();
+
+    await service.searchMovies({ title: 'The Matrix', type: 'movie' });
+    await service.searchMovies({ title: 'The Matrix', type: 'series' });
+
+    expect(omdb.searchMovies).toHaveBeenNthCalledWith(
+      1,
+      'The Matrix',
+      undefined,
+      'movie',
+    );
+    expect(omdb.searchMovies).toHaveBeenNthCalledWith(
+      2,
+      'The Matrix',
+      undefined,
+      'series',
+    );
+  });
+
   it('loads movie providers in parallel and caches the combined response', async () => {
     const { service, omdb, tmdb } = createService();
 

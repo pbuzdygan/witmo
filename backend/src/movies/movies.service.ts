@@ -21,9 +21,9 @@ export class MoviesService {
   async searchMovies(
     query: SearchMoviesQueryDto,
   ): Promise<MovieSearchResult[]> {
-    const key = `${query.title.toLocaleLowerCase('en-US')}|${query.year ?? ''}`;
+    const key = `${query.title.toLocaleLowerCase('en-US')}|${query.year ?? ''}|${query.type ?? ''}`;
     return this.searchCache.getOrCreate(key, () =>
-      this.omdbService.searchMovies(query.title, query.year),
+      this.omdbService.searchMovies(query.title, query.year, query.type),
     );
   }
 

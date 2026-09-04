@@ -3,6 +3,12 @@ const DEFAULT_RATE_LIMIT_TTL_MS = 60_000;
 const DEFAULT_RATE_LIMIT_MAX = 60;
 const DEFAULT_WATCH_REGION = 'US';
 
+function isPlaceholderCredential(value: string): boolean {
+  return /^(?:api[_-]?key|change[_-]?me|your[_-]?(?:api[_-]?)?key|example|placeholder)$/i.test(
+    value.trim(),
+  );
+}
+
 function parseInteger(
   value: unknown,
   fallback: number,
@@ -83,8 +89,18 @@ export function validateEnvironment(
   if (nodeEnv === 'production' && !omdbKey) {
     throw new Error('OMDb credentials are required in production.');
   }
+  if (nodeEnv === 'production' && isPlaceholderCredential(omdbKey)) {
+    throw new Error('OMDb credentials must not use a placeholder value.');
+  }
   if (nodeEnv === 'production' && !tmdbKey && !tmdbToken) {
     throw new Error('TMDb credentials are required in production.');
+  }
+  if (
+    nodeEnv === 'production' &&
+    (tmdbKey || tmdbToken) &&
+    [tmdbKey, tmdbToken].filter(Boolean).every(isPlaceholderCredential)
+  ) {
+    throw new Error('TMDb credentials must not use a placeholder value.');
   }
 
   output.PORT = parseInteger(input.PORT, DEFAULT_PORT, 'PORT', 1, 65_535);

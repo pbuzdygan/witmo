@@ -11,6 +11,7 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { ConcurrencyLimiter } from '../../common/concurrency-limiter';
 import { TtlCache } from '../../common/ttl-cache';
 import { MovieSearchResult } from '../../movies/dto/movie.dtos';
+import { SearchMediaType } from '../../movies/dto/search-movies-query.dto';
 
 interface TmdbFindResponse {
   movie_results?: Array<{
@@ -348,16 +349,23 @@ export class TmdbService {
 
   async searchByTitle(
     title: string,
-    limitPerType = 5,
+    requestedType?: SearchMediaType,
+    year?: string,
+    limitPerType = 20,
   ): Promise<MovieSearchResult[]> {
     if (!title.trim()) {
       return [];
     }
 
-    const [movies, tvShows] = await Promise.all([
-      this.fetchSearchResults('movie', title),
-      this.fetchSearchResults('tv', title),
-    ]);
+    const mediaTypes: TmdbMediaType[] =
+      requestedType === 'movie'
+        ? ['movie']
+        : requestedType === 'series'
+          ? ['tv']
+          : ['movie', 'tv'];
+    const resultSets = await Promise.all(
+      mediaTypes.map((type) => this.fetchSearchResults(type, title, year)),
+    );
 
     const combined: MovieSearchResult[] = [];
     const seen = new Set<string>();
@@ -366,23 +374,33 @@ export class TmdbService {
       entries: TmdbSearchResult[],
       type: TmdbMediaType,
     ) => {
-      for (const entry of entries.slice(0, limitPerType)) {
-        const imdbId = await this.getExternalIdsByTmdbId(entry.id, type);
-        if (!imdbId || seen.has(imdbId)) {
+      const normalized = await Promise.all(
+        entries.slice(0, limitPerType).map(async (entry) => {
+          const imdbId = await this.getExternalIdsByTmdbId(entry.id, type);
+          if (!imdbId) {
+            return null;
+          }
+          return {
+            imdbId,
+            title: entry.title ?? entry.name ?? title,
+            year: this.extractYearFromTmdb(entry, type),
+            posterUrl: this.buildPosterUrl(entry.poster_path),
+          } satisfies MovieSearchResult;
+        }),
+      );
+
+      for (const entry of normalized) {
+        if (!entry || seen.has(entry.imdbId)) {
           continue;
         }
-        seen.add(imdbId);
-        combined.push({
-          imdbId,
-          title: entry.title ?? entry.name ?? title,
-          year: this.extractYearFromTmdb(entry, type),
-          posterUrl: this.buildPosterUrl(entry.poster_path),
-        });
+        seen.add(entry.imdbId);
+        combined.push(entry);
       }
     };
 
-    await processEntries(movies, 'movie');
-    await processEntries(tvShows, 'tv');
+    for (const [index, entries] of resultSets.entries()) {
+      await processEntries(entries, mediaTypes[index]);
+    }
 
     return combined;
   }
@@ -532,13 +550,19 @@ export class TmdbService {
   private async fetchSearchResults(
     type: TmdbMediaType,
     title: string,
+    year?: string,
   ): Promise<TmdbSearchResult[]> {
     const endpoint = type === 'movie' ? '/search/movie' : '/search/tv';
-    const config = this.buildRequestConfig({
+    const params: Record<string, string> = {
       query: title,
       include_adult: 'false',
       page: '1',
-    });
+    };
+    if (year) {
+      params[type === 'movie' ? 'primary_release_year' : 'first_air_date_year'] =
+        year;
+    }
+    const config = this.buildRequestConfig(params);
     const data = await this.request<TmdbSearchResponse>(endpoint, config);
     return data.results ?? [];
   }

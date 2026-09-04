@@ -28,7 +28,9 @@ WITMO is a containerized movie discovery application built with a Next.js fronte
 
 3. Docker Compose:
 
-   - Configure the OMDb/TMDb credentials and `WATCH_REGION` in the Compose environment.
+   - Copy `.env.example` to `.env`, then configure `OMDB_API_KEY`,
+     `TMDB_READ_ACCESS_TOKEN`, and optionally `WATCH_REGION`. Compose refuses
+     to start with missing provider credentials.
    - Build and start the application with `docker compose build && docker compose up -d`.
 
 ## Development
@@ -74,6 +76,7 @@ Viewing history is stored in browser LocalStorage. The stored data is validated 
 - API parameters are validated and expensive endpoints have dedicated request limits.
 - OMDb and TMDb responses are cached, while outbound concurrency and queue sizes are bounded.
 - Helmet configures the Content Security Policy and other browser security headers.
+- API responses use `Cache-Control: no-store`, so search terms are not retained by browser or intermediary caches.
 - CORS is disabled by default. Set `CORS_ORIGINS` to a comma-separated list of trusted HTTP(S) origins when the frontend is hosted separately.
 - `TRUST_PROXY_HOPS` defaults to `0`. Change it only when the application is deployed behind a controlled reverse proxy, using the exact number of trusted hops.
 - `RATE_LIMIT_TTL_MS` and `RATE_LIMIT_MAX` control the global request limit. Their defaults are 60 seconds and 60 requests.

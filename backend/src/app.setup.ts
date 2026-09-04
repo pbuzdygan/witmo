@@ -1,5 +1,6 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import type { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 
 interface ExpressApplicationSettings {
@@ -53,6 +54,14 @@ export function configureApplication(
       referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     }),
   );
+
+  app.use((request: Request, response: Response, next: NextFunction) => {
+    if (request.path === '/api' || request.path.startsWith('/api/')) {
+      response.setHeader('Cache-Control', 'no-store, max-age=0');
+      response.setHeader('Pragma', 'no-cache');
+    }
+    next();
+  });
 
   const corsOrigins = config.get<string[]>('security.corsOrigins') ?? [];
   if (corsOrigins.length > 0) {

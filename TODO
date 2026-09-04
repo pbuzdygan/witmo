@@ -1,13 +1,8 @@
-Do wdrożenia przed pierwszym publicznym release’em zostały trzy rzeczy:
-1. Secret management — celowo odłożone zgodnie z Twoją decyzją. Trzeba usunąć ewentualne prawdziwe klucze z konfiguracji i historii, pozostawić tylko .env.example oraz uruchomić secret scanning na GitHubie.
-2. Testy przeglądarkowe — scenariusze użytkownika: wyszukiwanie, widok filmu, kolekcje i historia oglądania. Obecnie są testy backendu i buildy, ale nie pełne testy UI w przeglądarce.
-3. Przegląd dostępności i UX — klawiatura, czytelność na telefonach, stany ładowania i błędów.
-Dalsze, nieblokujące pomysły po release’ie:
+
+3. Dalsze, nieblokujące pomysły po release’ie:
 - watchlista i ulubione,
 - konto oraz synchronizacja historii,
 - kolejne języki, regiony i platformy streamingowe,
 - rekomendacje,
 - monitoring produkcyjny,
 - testy zgodności z odpowiedziami OMDb i TMDb.
-Błąd YouTube 153 jest już naprawiony i opisany w changelogu.
-Przed pierwszym wypchnięciem warto też świadomie przejrzeć stan Git: obecnie wszystkie przygotowane pliki są nieśledzone, a ścieżka test jest oznaczona jako usunięta. To nie jest funkcjonalny blocker, ale trzeba zdecydować, czy usunięcie test jest zamierzone, zanim zrobimy pierwszy commit.

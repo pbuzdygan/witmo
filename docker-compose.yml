@@ -6,13 +6,13 @@ services:
     build:
       context: .
     environment:
-      - PORT=4000
-      - OMDB_API_KEY=API_KEY
-#      - TMDB_API_KEY=API_KEY
-      - TMDB_READ_ACCESS_TOKEN=API_KEY
-      - WATCH_REGION=PL
+      PORT: "4000"
+      # Compose refuses to start until real secrets are supplied.
+      OMDB_API_KEY: ${OMDB_API_KEY:?Set OMDB_API_KEY in the local .env file}
+      TMDB_READ_ACCESS_TOKEN: ${TMDB_READ_ACCESS_TOKEN:?Set TMDB_READ_ACCESS_TOKEN in the local .env file}
+      WATCH_REGION: ${WATCH_REGION:-PL}
     ports:
-      - "127.0.0.1:8015:4000"
+      - "8015:4000"
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev,size=16m

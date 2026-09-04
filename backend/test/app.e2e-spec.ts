@@ -54,6 +54,8 @@ describe('AppController (e2e)', () => {
     expect(response.headers['referrer-policy']).toBe(
       'strict-origin-when-cross-origin',
     );
+    expect(response.headers['cache-control']).toBe('no-store, max-age=0');
+    expect(response.headers.pragma).toBe('no-cache');
     expect(response.headers['content-security-policy']).toContain(
       "frame-ancestors 'none'",
     );
@@ -64,6 +66,7 @@ describe('AppController (e2e)', () => {
     ['/api/search', 'missing title'],
     ['/api/search?title=%20%20%20', 'blank title'],
     ['/api/search?title=Alien&year=20xx', 'invalid year'],
+    ['/api/search?title=Alien&type=documentary', 'invalid media type'],
     ['/api/search?title=Alien&unexpected=true', 'unknown query field'],
     ['/api/movie/not-an-imdb-id', 'invalid IMDb id'],
   ])('rejects %s (%s)', (path) => {

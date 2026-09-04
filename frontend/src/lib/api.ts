@@ -39,8 +39,9 @@ const handleResponse = async <T>(response: Response): Promise<T> => {
 export const searchMovies = async (
   title: string,
   year?: string,
+  type?: 'movie' | 'series',
 ): Promise<MovieSearchResult[]> => {
-  const url = buildUrl('/api/search', { title, year });
+  const url = buildUrl('/api/search', { title, year, type });
   const response = await fetch(url, { cache: 'no-store' });
   return handleResponse<MovieSearchResult[]>(response);
 };

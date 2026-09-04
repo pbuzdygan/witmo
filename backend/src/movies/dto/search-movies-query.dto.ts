@@ -1,11 +1,14 @@
 import { Transform } from 'class-transformer';
 import {
+  IsIn,
   IsOptional,
   IsString,
   Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
+
+export type SearchMediaType = 'movie' | 'series';
 
 export class SearchMoviesQueryDto {
   @Transform(({ value }: { value: unknown }) =>
@@ -27,4 +30,11 @@ export class SearchMoviesQueryDto {
   @IsString()
   @Matches(/^\d{4}$/)
   year?: string;
+
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() || undefined : value,
+  )
+  @IsOptional()
+  @IsIn(['movie', 'series'])
+  type?: SearchMediaType;
 }
