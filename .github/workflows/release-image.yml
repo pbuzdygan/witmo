@@ -1,0 +1,54 @@
+name: Publish release image
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: release-image-${{ github.event.release.id }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    # A GitHub Release must explicitly target one of the two release branches.
+    if: >-
+      github.event.release.target_commitish == 'main' ||
+      github.event.release.target_commitish == 'dev'
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/${{ github.repository }}
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
+      TARGET_BRANCH: ${{ github.event.release.target_commitish }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out the released tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Build and publish release image
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$RELEASE_TAG" =~ ^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$ ]]; then
+            echo "Release tag '$RELEASE_TAG' is not a valid Docker tag." >&2
+            exit 1
+          fi
+
+          if [[ "$TARGET_BRANCH" == "main" ]]; then
+            version_tag="$RELEASE_TAG"
+            channel_tag="latest"
+          else
+            version_tag="dev_$RELEASE_TAG"
+            channel_tag="dev_latest"
+          fi
+
+          echo "$GITHUB_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          docker build --tag "$IMAGE:$version_tag" --tag "$IMAGE:$channel_tag" .
+          docker push "$IMAGE:$version_tag"
+          docker push "$IMAGE:$channel_tag"

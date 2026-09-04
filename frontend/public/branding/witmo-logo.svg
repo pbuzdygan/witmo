@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 224 64" fill="none">
+  <title>WITMO</title>
+  <defs><linearGradient id="g" x1="9" y1="8" x2="55" y2="56" gradientUnits="userSpaceOnUse"><stop stop-color="#6EE7B7"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs>
+  <rect width="64" height="64" rx="18" fill="#0F172A"/>
+  <path d="M12 18.5 20 45l12-19 12 19 8-26.5" stroke="url(#g)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="78" y="42" fill="#F8FAFC" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800" letter-spacing="3">WITMO</text>
+</svg>

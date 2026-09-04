@@ -1,0 +1,12 @@
+.git
+.github
+.env
+.env.*
+**/*.md
+**/node_modules
+**/.next
+**/out
+**/dist
+**/bundle
+**/coverage
+*.log
