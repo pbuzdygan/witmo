@@ -96,7 +96,7 @@ npm run lint
 npm run build
 ```
 
-GitHub Actions runs dependency auditing, linting, tests, application builds, CodeQL analysis, and secret scanning. It does not build a container image on commits or pull requests. Dependabot checks npm dependencies, the base image, and GitHub Actions weekly.
+GitHub Actions runs linting, tests, application builds, CodeQL analysis, and secret scanning on commits and pull requests. Dependency auditing runs weekly or on demand, so it does not delay commits. It does not build a container image on commits or pull requests. Dependabot checks npm dependencies, the base image, and GitHub Actions weekly.
 
 ## Container releases
 

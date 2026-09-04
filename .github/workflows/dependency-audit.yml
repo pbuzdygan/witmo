@@ -1,16 +1,13 @@
-name: CI
+name: Dependency audit
 
 on:
-  push:
-    branches: [dev, main]
-  pull_request:
+  schedule:
+    # Run independently from commits, once per week.
+    - cron: '43 4 * * 1'
+  workflow_dispatch:
 
 permissions:
   contents: read
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   backend:
@@ -29,16 +26,8 @@ jobs:
           cache-dependency-path: backend/package-lock.json
       - name: Install locked dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Lint
-        run: npm run lint
-      - name: Unit tests
-        run: npm test -- --runInBand
-      - name: API security tests
-        run: npm run test:e2e -- --runInBand
-        env:
-          NODE_ENV: test
-      - name: Build production bundle
-        run: npm run bundle
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
 
   frontend:
     runs-on: ubuntu-latest
@@ -56,9 +45,5 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - name: Install locked dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Lint
-        run: npm run lint
-      - name: Build static frontend
-        run: npm run build
-        env:
-          NEXT_TELEMETRY_DISABLED: 1
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
